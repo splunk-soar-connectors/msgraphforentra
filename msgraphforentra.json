@@ -1,0 +1,1416 @@
+{
+    "appid": "bf5de8fd-6437-4fc9-8c33-5f5bd3971d26",
+    "name": "MS Graph for Entra",
+    "description": "This app integrates with Microsoft Entra to execute various generic and investigative actions",
+    "type": "endpoint",
+    "product_vendor": "Microsoft",
+    "logo": "logo_msgraphforentra.svg",
+    "logo_dark": "logo_msgraphforentra_dark.svg",
+    "product_name": "Microsoft Entra",
+    "python_version": "3.9, 3.13",
+    "product_version_regex": ".*",
+    "publisher": "Splunk",
+    "contributors": [
+        {
+            "name": "Ian Wills"
+        }
+    ],
+    "license": "Copyright (c) 2022-2025 Splunk Inc.",
+    "app_version": "1.0.3",
+    "utctime_updated": "2024-12-17T19:23:33.000000Z",
+    "package_name": "phantom_msgraphforentra",
+    "main_module": "msgraphforentra_connector.py",
+    "min_phantom_version": "6.3.0",
+    "latest_tested_versions": [
+        "graph.microsoft.com/v1.0, April 2 2024"
+    ],
+    "app_wizard_version": "1.0.0",
+    "fips_compliant": true,
+    "rest_handler": "msgraphforentra_connector._handle_rest_request",
+    "configuration": {
+        "tenant_id": {
+            "description": "Tenant ID",
+            "data_type": "string",
+            "required": true,
+            "order": 0
+        },
+        "ph": {
+            "data_type": "ph",
+            "order": 1
+        },
+        "client_id": {
+            "description": "Client ID",
+            "data_type": "string",
+            "required": true,
+            "order": 2
+        },
+        "client_secret": {
+            "description": "Client Secret",
+            "data_type": "password",
+            "required": false,
+            "order": 3
+        },
+        "certificate_thumbprint": {
+            "description": "Certificate Thumbprint",
+            "data_type": "password",
+            "required": false,
+            "order": 4
+        },
+        "certificate_private_key": {
+            "description": "Certificate Private Key (.PEM)",
+            "data_type": "password",
+            "required": false,
+            "order": 5
+        },
+        "timeout": {
+            "description": "HTTP API timeout in seconds",
+            "data_type": "numeric",
+            "order": 6
+        },
+        "non_interactive": {
+            "description": "Non-Interactive Auth",
+            "data_type": "boolean",
+            "default": false,
+            "order": 7
+        },
+        "max_ingestions": {
+            "description": "Maximum risk detections/risk users for scheduled/interval polling for each cycle",
+            "data_type": "numeric",
+            "default": 500,
+            "order": 8
+        },
+        "start_time": {
+            "description": "Start time for schedule/interval/manual poll (Use this format: 1970-01-01T00:00:00Z)",
+            "data_type": "string",
+            "order": 9
+        },
+        "filter_risk_detections": {
+            "description": "Filter risk detections based on property (example: status ne 'active')",
+            "data_type": "string",
+            "order": 10
+        },
+        "filter_risky_users": {
+            "description": "Filter risky users based on property (example: status ne 'active')",
+            "data_type": "string",
+            "order": 11
+        }
+    },
+    "actions": [
+        {
+            "action": "test connectivity",
+            "identifier": "test_connectivity",
+            "description": "Validate the asset configuration for connectivity using supplied configuration",
+            "type": "test",
+            "read_only": true,
+            "parameters": {},
+            "output": [],
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "on poll",
+            "description": "Callback action for the on_poll ingest functionality",
+            "type": "ingest",
+            "identifier": "on_poll",
+            "read_only": true,
+            "parameters": {
+                "start_time": {
+                    "data_type": "numeric",
+                    "description": "Parameter ignored in this app",
+                    "order": 0
+                },
+                "end_time": {
+                    "data_type": "numeric",
+                    "description": "Parameter ignored in this app",
+                    "order": 1
+                },
+                "container_count": {
+                    "data_type": "numeric",
+                    "description": "Parameter ignored for schedule/interval polling only",
+                    "order": 2
+                },
+                "artifact_count": {
+                    "data_type": "numeric",
+                    "description": "Parameter ignored in this app",
+                    "order": 3
+                },
+                "container_id": {
+                    "data_type": "numeric",
+                    "description": "Parameter ignored in this app",
+                    "order": 4
+                }
+            },
+            "output": [],
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "dismiss users risk",
+            "description": "Dismiss the risk of one or more users",
+            "type": "generic",
+            "identifier": "dismiss_users_risk",
+            "read_only": false,
+            "parameters": {
+                "userids": {
+                    "data_type": "string",
+                    "description": "One or more userids to dismiss risk for",
+                    "primary": true,
+                    "contains": [
+                        "entra risky userid"
+                    ],
+                    "order": 0
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success"
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Successfully dismissed risk for specified userids"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.userids",
+                    "data_type": "string",
+                    "example_values": [
+                        "ba9e3378-9e5c-4159-a022-e6fee173bf35"
+                    ],
+                    "contains": [
+                        "entra risky userid"
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                }
+            ],
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "list risk detections",
+            "description": "List risk detections",
+            "type": "investigate",
+            "identifier": "list_risk_detections",
+            "read_only": true,
+            "parameters": {
+                "limit": {
+                    "description": "Maximum number of risk detections to return (Defaults to 50)",
+                    "data_type": "numeric",
+                    "default": 50,
+                    "order": 0
+                },
+                "filter": {
+                    "description": "Filter risk detections based on property",
+                    "data_type": "string",
+                    "order": 1
+                },
+                "orderby": {
+                    "description": "Sort the risk detections based on property",
+                    "data_type": "string",
+                    "order": 2
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.data.*.id",
+                    "data_type": "string",
+                    "example_values": [],
+                    "contains": [
+                        "sha256"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.source",
+                    "data_type": "string",
+                    "example_values": [
+                        "IdentityProtection"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.userId",
+                    "data_type": "string",
+                    "example_values": [
+                        "ba9e3378-9e5c-4159-a022-e6fee173bf35"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.activity",
+                    "data_type": "string",
+                    "example_values": [
+                        "signin"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.city",
+                    "data_type": "string",
+                    "example_values": [
+                        "Paris"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.state",
+                    "data_type": "string",
+                    "example_values": [
+                        "Paris"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.geoCoordinates.latitude",
+                    "data_type": "numeric",
+                    "example_values": [
+                        48.87276
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.geoCoordinates.longitude",
+                    "data_type": "numeric",
+                    "example_values": [
+                        2.27278
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.countryOrRegion",
+                    "data_type": "string",
+                    "example_values": [
+                        "FR"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.ipAddress",
+                    "data_type": "string",
+                    "example_values": [
+                        "2a0e:e701:1198::1"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.requestId",
+                    "data_type": "string",
+                    "example_values": [
+                        "aea71ec6-4431-421e-ac52-0592973b3c00"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskLevel",
+                    "data_type": "string",
+                    "example_values": [
+                        "medium"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskState",
+                    "data_type": "string",
+                    "example_values": [
+                        "dismissed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskDetail",
+                    "data_type": "string",
+                    "example_values": [
+                        "adminDismissedAllRiskForUser"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.correlationId",
+                    "data_type": "string",
+                    "example_values": [
+                        "6fe21b2f-63b3-4590-a440-2cd21c9f0bff"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskEventType",
+                    "data_type": "string",
+                    "example_values": [
+                        "anonymizedIPAddress"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.additionalInfo",
+                    "data_type": "string",
+                    "example_values": [
+                        "[{\"Key\":\"userAgent\",\"Value\":\"Mozilla/5.0 (Windows NT 10.0; rv:109.0) Gecko/20100101 Firefox/115.0\"},{\"Key\":\"mitreTechniques\",\"Value\":\"T1090.003,T1078\"}]"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.tokenIssuerType",
+                    "data_type": "string",
+                    "example_values": [
+                        "AzureAD"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.userDisplayName",
+                    "data_type": "string",
+                    "example_values": [
+                        "Lee Gu"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.activityDateTime",
+                    "data_type": "string",
+                    "example_values": [
+                        "2025-01-27T19:00:24.0871469Z"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.detectedDateTime",
+                    "data_type": "string",
+                    "example_values": [
+                        "2025-01-27T19:00:24.0871469Z"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.userPrincipalName",
+                    "data_type": "string",
+                    "example_values": [
+                        "LeeG@tlp5x.onmicrosoft.com"
+                    ],
+                    "contains": [
+                        "email"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.detectionTimingType",
+                    "data_type": "string",
+                    "example_values": [
+                        "realtime"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.lastUpdatedDateTime",
+                    "data_type": "string",
+                    "example_values": [
+                        "2025-01-27T19:52:10.3086944Z"
+                    ]
+                },
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success"
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Total risk detections: 1"
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.total_risk_detections",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.limit",
+                    "data_type": "numeric",
+                    "example_values": [
+                        50
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.filter",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.orderby",
+                    "data_type": "string"
+                }
+            ],
+            "render": {
+                "type": "custom",
+                "width": 10,
+                "height": 5,
+                "view": "msgraphforentra_view.display_risk_detections",
+                "title": "List Risk Detections"
+            },
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "list risky users",
+            "description": "List risky users",
+            "type": "investigate",
+            "identifier": "list_risky_users",
+            "read_only": true,
+            "parameters": {
+                "limit": {
+                    "description": "Maximum number of risky users to return (Defaults to 50)",
+                    "data_type": "numeric",
+                    "default": 50,
+                    "order": 0
+                },
+                "filter": {
+                    "description": "Filter risky users based on property",
+                    "data_type": "string",
+                    "order": 1
+                },
+                "orderby": {
+                    "description": "Sort the risky users based on property",
+                    "data_type": "string",
+                    "order": 2
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.data.*.id",
+                    "data_type": "string",
+                    "contains": [
+                        "entra risky userid"
+                    ],
+                    "example_values": [
+                        "a75e9d70-b67e-42f7-bbd3-8c586e4b8d2e"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.isDeleted",
+                    "data_type": "boolean",
+                    "example_values": [
+                        false
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskLevel",
+                    "data_type": "string",
+                    "example_values": [
+                        "none"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskState",
+                    "data_type": "string",
+                    "example_values": [
+                        "dismissed"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskDetail",
+                    "data_type": "string",
+                    "example_values": [
+                        "adminDismissedAllRiskForUser"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.isProcessing",
+                    "data_type": "boolean",
+                    "example_values": [
+                        false
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.userDisplayName",
+                    "data_type": "string",
+                    "example_values": [
+                        "Ian Wills"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.userPrincipalName",
+                    "data_type": "string",
+                    "example_values": [
+                        "iwills@tlp5x.onmicrosoft.com"
+                    ],
+                    "contains": [
+                        "email"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskLastUpdatedDateTime",
+                    "data_type": "string",
+                    "example_values": [
+                        "2024-06-05T17:33:50.0817259Z"
+                    ]
+                },
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success"
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Total risky users: 4"
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.total_risky_users",
+                    "data_type": "numeric",
+                    "example_values": [
+                        4
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.limit",
+                    "data_type": "numeric",
+                    "example_values": [
+                        50
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.filter",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.orderby",
+                    "data_type": "string"
+                }
+            ],
+            "render": {
+                "type": "custom",
+                "width": 10,
+                "height": 5,
+                "view": "msgraphforentra_view.display_risky_users",
+                "title": "List Risky Users"
+            },
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "list devices",
+            "description": "List devices",
+            "type": "investigate",
+            "identifier": "list_devices",
+            "read_only": true,
+            "parameters": {
+                "limit": {
+                    "description": "Maximum number of devices to return (Defaults to 50)",
+                    "data_type": "numeric",
+                    "default": 50,
+                    "order": 0
+                },
+                "offset": {
+                    "description": "Number of devices to skip (Defaults to 0)",
+                    "data_type": "numeric",
+                    "default": 0,
+                    "order": 1
+                },
+                "filter": {
+                    "description": "Filter devices based on property",
+                    "data_type": "string",
+                    "order": 2
+                },
+                "orderby": {
+                    "description": "Sort the devices based on property",
+                    "data_type": "string",
+                    "order": 3
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.parameter.limit",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.parameter.offset",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.parameter.filter",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.parameter.orderby",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric"
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric"
+                }
+            ],
+            "render": {
+                "type": "custom",
+                "width": 10,
+                "height": 5,
+                "view": "msgraphforentra_view.display_devices",
+                "title": "List Devices"
+            },
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "list signins",
+            "description": "List user signins",
+            "type": "investigate",
+            "identifier": "list_signins",
+            "read_only": true,
+            "parameters": {
+                "limit": {
+                    "description": "Maximum number of signins to return (Defaults to 50)",
+                    "data_type": "numeric",
+                    "default": 50,
+                    "order": 0
+                },
+                "filter_start_datetime": {
+                    "description": "Start time to filter sigins by. Format can be YYYY-MM-DD or YYYY-MM-DDThh:mm:ssZ",
+                    "data_type": "string",
+                    "required": true,
+                    "order": 1
+                },
+                "filter_end_datetime": {
+                    "description": "End time to filter sigins by. Format can be YYYY-MM-DD or YYYY-MM-DDThh:mm:ssZ",
+                    "data_type": "string",
+                    "required": true,
+                    "order": 2
+                },
+                "filter": {
+                    "description": "Filter signins based on property",
+                    "data_type": "string",
+                    "order": 3
+                },
+                "orderby": {
+                    "description": "Sort the signins based on property",
+                    "data_type": "string",
+                    "order": 4
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.data.*.id",
+                    "data_type": "string",
+                    "example_values": [
+                        "32753854-58f3-40f2-bef7-ae9db94b1800"
+                    ],
+                    "contains": [
+                        "entra signin id"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.appId",
+                    "data_type": "string",
+                    "example_values": [
+                        "c44b4083-3bb0-49c1-b47d-974e53cbdf3c"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.status.errorCode",
+                    "data_type": "numeric",
+                    "example_values": [
+                        0
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.status.failureReason",
+                    "data_type": "string",
+                    "example_values": [
+                        "Other."
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.status.additionalDetails",
+                    "data_type": "string",
+                    "example_values": [
+                        "MFA requirement satisfied by claim in the token"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.userId",
+                    "data_type": "string",
+                    "example_values": [
+                        "a75e9d70-b67e-42f7-bbd3-8c586e4b8d2e"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.city",
+                    "data_type": "string",
+                    "example_values": [
+                        "Denver"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.state",
+                    "data_type": "string",
+                    "example_values": [
+                        "Colorado"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.geoCoordinates.altitude",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.location.geoCoordinates.latitude",
+                    "data_type": "numeric",
+                    "example_values": [
+                        39.74249
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.geoCoordinates.longitude",
+                    "data_type": "numeric",
+                    "example_values": [
+                        -104.9856
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.countryOrRegion",
+                    "data_type": "string",
+                    "example_values": [
+                        "US"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.ipAddress",
+                    "data_type": "string",
+                    "example_values": [
+                        "216.147.121.134"
+                    ],
+                    "contains": [
+                        "ip"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskState",
+                    "data_type": "string",
+                    "example_values": [
+                        "none"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.resourceId",
+                    "data_type": "string",
+                    "example_values": [
+                        "c44b4083-3bb0-49c1-b47d-974e53cbdf3c"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskDetail",
+                    "data_type": "string",
+                    "example_values": [
+                        "none"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.deviceDetail.browser",
+                    "data_type": "string",
+                    "example_values": [
+                        "Chrome 131.0.0"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.deviceDetail.deviceId",
+                    "data_type": "string",
+                    "example_values": [
+                        ""
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.deviceDetail.isManaged",
+                    "data_type": "boolean",
+                    "example_values": [
+                        false
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.deviceDetail.trustType",
+                    "data_type": "string",
+                    "example_values": [
+                        ""
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.deviceDetail.displayName",
+                    "data_type": "string",
+                    "example_values": [
+                        ""
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.deviceDetail.isCompliant",
+                    "data_type": "boolean",
+                    "example_values": [
+                        false
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.deviceDetail.operatingSystem",
+                    "data_type": "string",
+                    "example_values": [
+                        "MacOs"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.clientAppUsed",
+                    "data_type": "string",
+                    "example_values": [
+                        "Browser"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.correlationId",
+                    "data_type": "string",
+                    "example_values": [
+                        "aca6d53e-4b3b-49a3-a505-3eca2fab8f49"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.isInteractive",
+                    "data_type": "boolean",
+                    "example_values": [
+                        true
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.appDisplayName",
+                    "data_type": "string",
+                    "example_values": [
+                        "Azure Portal"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.createdDateTime",
+                    "data_type": "string",
+                    "example_values": [
+                        "2025-01-28T12:40:41Z"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.userDisplayName",
+                    "data_type": "string",
+                    "example_values": [
+                        "Ian Wills"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.userPrincipalName",
+                    "data_type": "string",
+                    "example_values": [
+                        "iwills@tlp5x.onmicrosoft.com"
+                    ],
+                    "contains": [
+                        "email"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.resourceDisplayName",
+                    "data_type": "string",
+                    "example_values": [
+                        "Azure Portal"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskLevelAggregated",
+                    "data_type": "string",
+                    "example_values": [
+                        "none"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskLevelDuringSignIn",
+                    "data_type": "string",
+                    "example_values": [
+                        "none"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.conditionalAccessStatus",
+                    "data_type": "string",
+                    "example_values": [
+                        "notApplied"
+                    ]
+                },
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success"
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        "Total signins: 1"
+                    ]
+                },
+                {
+                    "data_path": "action_result.summary.total_signins",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.limit",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.filter",
+                    "data_type": "string",
+                    "example_values": [
+                        "userDisplayName eq 'Ian Wills'"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.filter_end_datetime",
+                    "data_type": "string",
+                    "example_values": [
+                        "2025-01-30"
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.filter_start_datetime",
+                    "data_type": "string",
+                    "example_values": [
+                        "2025-01-26"
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.orderby",
+                    "data_type": "string"
+                }
+            ],
+            "render": {
+                "type": "custom",
+                "width": 10,
+                "height": 5,
+                "view": "msgraphforentra_view.display_signins",
+                "title": "List Signins"
+            },
+            "versions": "EQ(*)"
+        },
+        {
+            "action": "get signin",
+            "description": "Get user signin",
+            "type": "investigate",
+            "identifier": "get_signin",
+            "read_only": true,
+            "parameters": {
+                "signin_id": {
+                    "description": "Signin ID",
+                    "data_type": "string",
+                    "required": true,
+                    "primary": true,
+                    "contains": [
+                        "entra signin id"
+                    ],
+                    "order": 0
+                }
+            },
+            "output": [
+                {
+                    "data_path": "action_result.data.*.id",
+                    "data_type": "string",
+                    "example_values": [
+                        "32753854-58f3-40f2-bef7-ae9db94b1800"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.appId",
+                    "data_type": "string",
+                    "example_values": [
+                        "c44b4083-3bb0-49c1-b47d-974e53cbdf3c"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.status.errorCode",
+                    "data_type": "numeric",
+                    "example_values": [
+                        0
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.status.failureReason",
+                    "data_type": "string",
+                    "example_values": [
+                        "Other."
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.status.additionalDetails",
+                    "data_type": "string",
+                    "example_values": [
+                        "MFA requirement satisfied by claim in the token"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.userId",
+                    "data_type": "string",
+                    "example_values": [
+                        "a75e9d70-b67e-42f7-bbd3-8c586e4b8d2e"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.city",
+                    "data_type": "string",
+                    "example_values": [
+                        "Denver"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.state",
+                    "data_type": "string",
+                    "example_values": [
+                        "Colorado"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.geoCoordinates.altitude",
+                    "data_type": "string"
+                },
+                {
+                    "data_path": "action_result.data.*.location.geoCoordinates.latitude",
+                    "data_type": "numeric",
+                    "example_values": [
+                        39.74249
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.geoCoordinates.longitude",
+                    "data_type": "numeric",
+                    "example_values": [
+                        -104.9856
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.location.countryOrRegion",
+                    "data_type": "string",
+                    "example_values": [
+                        "US"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.ipAddress",
+                    "data_type": "string",
+                    "example_values": [
+                        "216.147.121.134"
+                    ],
+                    "contains": [
+                        "ip"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskState",
+                    "data_type": "string",
+                    "example_values": [
+                        "none"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.resourceId",
+                    "data_type": "string",
+                    "example_values": [
+                        "c44b4083-3bb0-49c1-b47d-974e53cbdf3c"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskDetail",
+                    "data_type": "string",
+                    "example_values": [
+                        "none"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.deviceDetail.browser",
+                    "data_type": "string",
+                    "example_values": [
+                        "Chrome 131.0.0"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.deviceDetail.deviceId",
+                    "data_type": "string",
+                    "example_values": [
+                        ""
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.deviceDetail.isManaged",
+                    "data_type": "boolean",
+                    "example_values": [
+                        false
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.deviceDetail.trustType",
+                    "data_type": "string",
+                    "example_values": [
+                        ""
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.deviceDetail.displayName",
+                    "data_type": "string",
+                    "example_values": [
+                        ""
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.deviceDetail.isCompliant",
+                    "data_type": "boolean",
+                    "example_values": [
+                        false
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.deviceDetail.operatingSystem",
+                    "data_type": "string",
+                    "example_values": [
+                        "MacOs"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.clientAppUsed",
+                    "data_type": "string",
+                    "example_values": [
+                        "Browser"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.correlationId",
+                    "data_type": "string",
+                    "example_values": [
+                        "aca6d53e-4b3b-49a3-a505-3eca2fab8f49"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.isInteractive",
+                    "data_type": "numeric",
+                    "example_values": [
+                        true
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.@odata.context",
+                    "data_type": "string",
+                    "example_values": [
+                        "https://graph.microsoft.com/v1.0/$metadata#auditLogs/signIns/$entity"
+                    ],
+                    "contains": [
+                        "url"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.appDisplayName",
+                    "data_type": "string",
+                    "example_values": [
+                        "Azure Portal"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.createdDateTime",
+                    "data_type": "string",
+                    "example_values": [
+                        "2025-01-28T12:40:41Z"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.userDisplayName",
+                    "data_type": "string",
+                    "example_values": [
+                        "Ian Wills"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.userPrincipalName",
+                    "data_type": "string",
+                    "example_values": [
+                        "iwills@tlp5x.onmicrosoft.com"
+                    ],
+                    "contains": [
+                        "email"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.resourceDisplayName",
+                    "data_type": "string",
+                    "example_values": [
+                        "Azure Portal"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskLevelAggregated",
+                    "data_type": "string",
+                    "example_values": [
+                        "none"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.riskLevelDuringSignIn",
+                    "data_type": "string",
+                    "example_values": [
+                        "none"
+                    ]
+                },
+                {
+                    "data_path": "action_result.data.*.conditionalAccessStatus",
+                    "data_type": "string",
+                    "example_values": [
+                        "notApplied"
+                    ]
+                },
+                {
+                    "data_path": "action_result.status",
+                    "data_type": "string",
+                    "example_values": [
+                        "success"
+                    ]
+                },
+                {
+                    "data_path": "action_result.message",
+                    "data_type": "string",
+                    "example_values": [
+                        ""
+                    ]
+                },
+                {
+                    "data_path": "action_result.parameter.signin_id",
+                    "data_type": "string",
+                    "example_values": [
+                        "32753854-58f3-40f2-bef7-ae9db94b1800"
+                    ],
+                    "contains": [
+                        "entra signin id"
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                },
+                {
+                    "data_path": "summary.total_objects_successful",
+                    "data_type": "numeric",
+                    "example_values": [
+                        1
+                    ]
+                }
+            ],
+            "render": {
+                "type": "custom",
+                "width": 10,
+                "height": 5,
+                "view": "msgraphforentra_view.display_signins",
+                "title": "List Signins"
+            },
+            "versions": "EQ(*)"
+        }
+    ],
+    "pip_dependencies": {
+        "wheel": []
+    },
+    "pip39_dependencies": {
+        "wheel": [
+            {
+                "module": "PyJWT",
+                "input_file": "wheels/py3/PyJWT-2.10.1-py3-none-any.whl"
+            },
+            {
+                "module": "cffi",
+                "input_file": "wheels/py39/cffi-2.0.0-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl"
+            },
+            {
+                "module": "cryptography",
+                "input_file": "wheels/py3/cryptography-45.0.7-cp37-abi3-manylinux_2_28_x86_64.whl"
+            },
+            {
+                "module": "msal",
+                "input_file": "wheels/py3/msal-1.31.0-py3-none-any.whl"
+            },
+            {
+                "module": "pycparser",
+                "input_file": "wheels/py3/pycparser-2.23-py3-none-any.whl"
+            }
+        ]
+    },
+    "pip313_dependencies": {
+        "wheel": [
+            {
+                "module": "PyJWT",
+                "input_file": "wheels/py3/PyJWT-2.10.1-py3-none-any.whl"
+            },
+            {
+                "module": "cffi",
+                "input_file": "wheels/py313/cffi-2.0.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl"
+            },
+            {
+                "module": "cryptography",
+                "input_file": "wheels/py3/cryptography-45.0.7-cp311-abi3-manylinux_2_28_x86_64.whl"
+            },
+            {
+                "module": "msal",
+                "input_file": "wheels/py3/msal-1.31.0-py3-none-any.whl"
+            },
+            {
+                "module": "pycparser",
+                "input_file": "wheels/py3/pycparser-2.23-py3-none-any.whl"
+            }
+        ]
+    }
+}
